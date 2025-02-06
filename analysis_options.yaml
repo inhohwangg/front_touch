@@ -1,0 +1,11 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    avoid_print: false
+    prefer_typing_uninitialized_variables: false
+    prefer_const_constructors_in_immutables: false
+    prefer_const_constructors: false
+    prefer_const_declarations: false # 추가
+    prefer_const_literals_to_create_immutables: false # 추가
+    use_key_in_widget_constructors: false # 추가

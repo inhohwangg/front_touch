@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">front_camera_touch</string>
+    <string name="accessibility_service_description">화면을 터치하면 스크린샷을 찍는 접근성 서비스</string>
+</resources>
+
