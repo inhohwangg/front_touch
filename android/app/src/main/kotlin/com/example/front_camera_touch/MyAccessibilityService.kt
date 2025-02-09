@@ -85,7 +85,8 @@ class MyAccessibilityService : AccessibilityService() {
                     Log.d("AccessibilityService", "터치 감지: ($x, $y)")
 
                     if (isFrontCameraTouched(x, y)) {
-                        takeScreenshot()
+                        triggerNativeScreenshot()
+                        // takeScreenshot()
                         return@setOnTouchListener true  // 영역 내에서는 이벤트 소비
                     }
                 }
@@ -116,6 +117,21 @@ class MyAccessibilityService : AccessibilityService() {
 
         return (x.toInt() in cameraAreaX..(cameraAreaX + 200) &&
             y.toInt() in 0..(cameraAreaY + 200))
+    }
+
+    private fun triggerNativeScreenshot() {
+        Log.d("AccessibilityService", "네이티브 스크린샷 트리거 실행")
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val result: Boolean = performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT)
+            if (!result) {
+                Log.e("AccessibilityService", "네이티브 스크린샷 트리거 실패")
+            } else {
+                Log.d("AccessibilityService", "네이티브 스크린샷 트리거 성공")
+            }
+        } else {
+            Log.e("AccessibilityService", "네이티브 스크린샷은 Android 10(API 29) 이상에서만 지원됩니다.")
+        }
     }
 
     private fun takeScreenshot() {
