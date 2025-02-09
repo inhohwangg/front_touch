@@ -26,8 +26,10 @@ class MainActivity : FlutterActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == SCREEN_CAPTURE_REQUEST_CODE) {
+            Log.d("MainActivity","onActivityResult : resultCode = $resultCode, data = $data")
             if (resultCode == Activity.RESULT_OK && data != null) {
-                // Foreground Service 시작하여 MediaProjection 생성
+                Log.d("MainActivity", "스크린 캡처 권한 승인 완료")
+                // Foreground Service 시작
                 val serviceIntent = Intent(this, MediaProjectionForegroundService::class.java).apply {
                     putExtra("resultCode", resultCode)
                     putExtra("data", data)
@@ -35,7 +37,7 @@ class MainActivity : FlutterActivity() {
                 startForegroundService(serviceIntent)
                 Log.d("MainActivity", "MediaProjectionForegroundService가 시작되었습니다.")
             } else {
-                Log.e("MainActivity", "스크린 캡처 퍼미션이 거부되었습니다.")
+                Log.e("MainActivity", "스크린 캡처 권한이 거부되었습니다.")
             }
         }
     }

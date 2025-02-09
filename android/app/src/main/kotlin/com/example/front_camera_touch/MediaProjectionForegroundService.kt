@@ -46,7 +46,11 @@ class MediaProjectionForegroundService : Service() {
         val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         try {
             mediaProjection = projectionManager.getMediaProjection(resultCode, data!!)
-            Log.d("MediaProjectionService", "MediaProjection이 정상적으로 생성되었습니다.")
+            if (mediaProjection != null) {
+                Log.d("MediaProjectionService", "MediaProjection 초기화 성공")
+            } else {
+                Log.e("MediaProjectionService", "MediaProjection 초기화 실패")
+            }
         } catch (e: Exception) {
             Log.e("MediaProjectionService", "MediaProjection 생성 오류: ${e.message}")
         }

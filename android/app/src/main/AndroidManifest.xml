@@ -10,6 +10,7 @@
         android:usesCleartextTraffic="true"
         android:label="front_camera_touch"
         android:name="${applicationName}"
+        android:foregroundServiceType="mediaProjection"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

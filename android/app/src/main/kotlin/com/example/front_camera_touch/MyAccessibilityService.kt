@@ -18,6 +18,10 @@ import android.media.projection.MediaProjectionManager
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.graphics.Bitmap
+import android.os.Environment
+import java.io.File
+import java.io.FileOutputStream
 
 class MyAccessibilityService : AccessibilityService() {
     companion object {
@@ -118,16 +122,17 @@ class MyAccessibilityService : AccessibilityService() {
         Thread {
             try {
                 Log.d("AccessibilityService", "스크린샷 촬영 시작")
-                // 스크린샷 코드 추가
-                if (mediaProjection == null) {
+                val projection = MediaProjectionForegroundService.mediaProjection
+                if (projection == null) {
                     Log.e("AccessibilityService", "MediaProjection is null. 스크린샷 권한 필요")
                     return@Thread
                 }
+                Log.d("AccessibilityService", "MediaProjection 사용 가능: $projection")
                 val density = resources.displayMetrics.densityDpi
 
                 // ImageReader 및 VirtualDisplay 생성
                 imageReader = ImageReader.newInstance(screenWidth, screenHeight, PixelFormat.RGBA_8888, 2)
-                virtualDisplay = mediaProjection?.createVirtualDisplay(
+                val virtualDisplay = projection.createVirtualDisplay(
                     "ScreenCapture",
                     screenWidth,
                     screenHeight,
@@ -137,25 +142,52 @@ class MyAccessibilityService : AccessibilityService() {
                     null,
                     null
                 )
+                Log.d("AccessibilityService", "VirtualDisplay 생성됨")
 
-                // 잠시 대기 후 이미지 획득 (필요에 따라 delay 시간을 조정)
+                // 약간의 지연 후 이미지 획득 (500ms 정도)
                 Thread.sleep(500)
+
                 val image = imageReader?.acquireLatestImage()
                 if (image != null) {
                     Log.d("AccessibilityService", "스크린샷 캡처 완료")
-                    // ★ 여기서 image를 Bitmap으로 변환하거나 파일로 저장하는 등의 추가 처리를 할 수 있음.
+                    // Image를 Bitmap으로 변환
+                    val planes = image.planes
+                    val buffer = planes[0].buffer
+                    val pixelStride = planes[0].pixelStride
+                    val rowStride = planes[0].rowStride
+                    val rowPadding = rowStride - pixelStride * screenWidth
+                    // Bitmap의 넓이는 보통 rowStride와 관련 있음. 필요에 따라 정확한 크기로 자를 수 있음.
+                    var bitmap = Bitmap.createBitmap(
+                        screenWidth + rowPadding / pixelStride,
+                        screenHeight,
+                        Bitmap.Config.ARGB_8888
+                    )
+                    bitmap.copyPixelsFromBuffer(buffer)
+                    // 정확한 화면 사이즈로 자르기 (선택 사항)
+                    bitmap = Bitmap.createBitmap(bitmap, 0, 0, screenWidth, screenHeight)
+
+                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
+                    // Bitmap을 파일로 저장 (예시)
+                    val file = File(downloadsDir, "screenshot_${System.currentTimeMillis()}.png")
+                    val fos = FileOutputStream(file)
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                    fos.flush()
+                    fos.close()
+                    Log.d("AccessibilityService", "스크린샷 파일 저장 완료: ${file.absolutePath}")
+
                     image.close()
                 } else {
                     Log.e("AccessibilityService", "이미지 캡처 실패")
                 }
                 imageReader?.close()
-                virtualDisplay?.release()
+                virtualDisplay.release()
             } catch (e: Exception) {
                 Log.e("AccessibilityService", "스크린샷 오류: ${e.message}")
             }
         }.start()
     }
-
+    
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
 
     override fun onInterrupt() {}
