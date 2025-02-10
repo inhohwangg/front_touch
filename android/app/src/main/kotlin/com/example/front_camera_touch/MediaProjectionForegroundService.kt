@@ -55,7 +55,7 @@ class MediaProjectionForegroundService : Service() {
             Log.e("MediaProjectionService", "MediaProjection 생성 오류: ${e.message}")
         }
         // 서비스가 종료되면 자동 재시작하지 않음.
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     private fun createNotificationChannel() {
